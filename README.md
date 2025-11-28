@@ -1,4 +1,34 @@
-  代码运行流程
+  cd /content/DEEP2/SSD-Resnet-Attention-FeatureFusion-master
+  mkdir -p datasets
+  cd datasets
+
+  # 下载 VOC2007 训练/验证集
+  wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar
+
+  # 下载 VOC2007 测试集
+  wget http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar
+
+  # 解压
+  tar -xf VOCtrainval_06-Nov-2007.tar
+  tar -xf VOCtest_06-Nov-2007.tar
+
+  # 重命名目录（解压后是 VOCdevkit/VOC2007，需要移动）
+  mv VOCdevkit/VOC2007 ./
+
+  # 1. 安装依赖
+  cd SSD-Resnet-Attention-FeatureFusion-master
+  pip install -r requirements.txt
+
+  # 2. 训练模型
+  python3 train.py --config-file configs/resnet50_ssd300_voc0712_feature_fusion.yaml
+
+  # 3. 编译 Qt 界面
+  cd ../qt_deep2
+  qmake external_program.pro
+  make
+
+  # 4. 运行检测界面
+  ./external_program
 
   一、训练流程
 
@@ -135,22 +165,3 @@
   | configs/resnet50_ssd300_voc0712_feature_fusion.yaml:28 | BATCH_SIZE: 32 → BATCH_SIZE: 16  |
   | demo1.py:40                                            | 补充通信文件路径                         |
   | demo1.py:81                                            | 补充结果保存路径                         |
-
-  四、运行命令总结
-
-  # 1. 安装依赖
-  cd SSD-Resnet-Attention-FeatureFusion-master
-  pip install -r requirements.txt
-
-  # 2. 训练模型
-  python3 train.py --config-file configs/resnet50_ssd300_voc0712_feature_fusion.yaml
-
-  # 3. 编译 Qt 界面
-  cd ../qt_deep2
-  qmake external_program.pro
-  make
-
-  # 4. 运行检测界面
-  ./external_program
-
-  
