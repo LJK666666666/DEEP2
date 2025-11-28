@@ -6,6 +6,7 @@ from torchvision import transforms
 import cv2
 import numpy as np
 import types
+import random as python_random
 from numpy import random
 
 
@@ -269,8 +270,8 @@ class RandomSampleCrop(object):
             return image, boxes, labels
         height, width, _ = image.shape
         while True:
-            # randomly choose a mode
-            mode = random.choice(self.sample_options)
+            # randomly choose a mode (使用 Python 标准库的 random.choice，兼容 NumPy 2.0+)
+            mode = python_random.choice(self.sample_options)
             if mode is None:
                 return image, boxes, labels
 
