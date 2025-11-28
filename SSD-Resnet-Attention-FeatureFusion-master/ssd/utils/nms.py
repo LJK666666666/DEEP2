@@ -8,7 +8,8 @@ try:
 
     _nms = torch_extension.nms
 except ImportError:
-    if torchvision.__version__ >= '0.3.0':
+    # 使用 torchvision 内置的 NMS（适用于 torchvision >= 0.3.0）
+    if hasattr(torchvision.ops, 'nms'):
         _nms = torchvision.ops.nms
     else:
         warnings.warn('No NMS is available. Please upgrade torchvision to 0.3.0+ or compile c++ NMS '
