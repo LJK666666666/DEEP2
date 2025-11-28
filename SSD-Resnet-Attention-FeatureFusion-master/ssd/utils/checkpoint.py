@@ -104,4 +104,5 @@ class CheckPointer:
             cached_f = cache_url(f)
             self.logger.info("url {} cached in {}".format(f, cached_f))
             f = cached_f
-        return torch.load(f, map_location=torch.device("cpu"))
+        # PyTorch 2.6+ 默认 weights_only=True，但旧格式模型需要设置为 False
+        return torch.load(f, map_location=torch.device("cpu"), weights_only=False)
