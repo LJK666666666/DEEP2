@@ -1,3 +1,62 @@
+# 深度学习实验二：SSD 目标检测
+
+## 快速开始
+
+```bash
+# ============================================
+# 1. 环境安装
+# ============================================
+cd SSD-Resnet-Attention-FeatureFusion-master
+pip install -r requirements.txt
+
+# ============================================
+# 2. 数据集准备 (VOC2007)
+# ============================================
+mkdir -p datasets && cd datasets
+wget https://pjreddie.com/media/files/VOCtrainval_06-Nov-2007.tar
+wget https://pjreddie.com/media/files/VOCtest_06-Nov-2007.tar
+tar -xf VOCtrainval_06-Nov-2007.tar
+tar -xf VOCtest_06-Nov-2007.tar
+mv VOCdevkit/VOC2007 ./
+rm -rf VOCdevkit *.tar
+cd ..
+
+# ============================================
+# 3. 训练模型 (原始 Anchor)
+# ============================================
+python3 train.py --config-file configs/resnet50_ssd300_voc0712_feature_fusion.yaml
+
+# ============================================
+# 4. K-means++ 优化 Anchor 对比实验 (思考题)
+# ============================================
+# 4.1 运行聚类分析
+python kmeans_anchor.py --data_dir datasets/VOC2007 --clusters 6
+
+# 4.2 创建优化配置文件
+cp configs/resnet50_ssd300_voc0712_feature_fusion.yaml \
+   configs/resnet50_ssd300_voc0712_feature_fusion_kmeans.yaml
+# 根据聚类结果修改 resnet50_ssd300_voc0712_feature_fusion_kmeans.yaml 中的 MIN_SIZES 和 MAX_SIZES
+
+# 4.3 训练优化 Anchor 模型
+python3 train.py --config-file configs/resnet50_ssd300_voc0712_feature_fusion_kmeans.yaml
+
+# 4.4 对比评估
+python3 test.py --config-file configs/resnet50_ssd300_voc0712_feature_fusion.yaml
+python3 test.py --config-file configs/resnet50_ssd300_voc0712_feature_fusion_kmeans.yaml
+
+# ============================================
+# 5. Qt 界面编译运行
+# ============================================
+cd ../qt_deep2
+qmake external_program.pro
+make
+./external_program
+```
+
+---
+
+## 详细说明
+
   cd /content/DEEP2/SSD-Resnet-Attention-FeatureFusion-master
   mkdir -p datasets
   cd datasets
@@ -165,3 +224,53 @@
   | configs/resnet50_ssd300_voc0712_feature_fusion.yaml:28 | BATCH_SIZE: 32 → BATCH_SIZE: 16  |
   | demo1.py:40                                            | 补充通信文件路径                         |
   | demo1.py:81                                            | 补充结果保存路径                         |
+
+  四、K-means++ 优化 Anchor 框对比实验
+
+  步骤 1: 运行 K-means++ 聚类分析
+  ────────────────────────────────
+  # 分析 VOC2007 数据集目标框尺寸，生成优化后的 Anchor 配置
+  python kmeans_anchor.py --data_dir datasets/VOC2007 --clusters 6
+
+  # 输出结果保存在 outputs/kmeans_analysis/ 目录下：
+  #   - anchor_clusters.png              聚类散点图
+  #   - aspect_ratio_distribution.png    宽高比分布图
+  #   - anchor_boxes_visualization.png   Anchor 框可视化
+  #   - optimized_anchor_config.yaml     优化后的配置
+
+  步骤 2: 创建优化后的配置文件
+  ────────────────────────────────
+  # 复制原配置文件
+  cp configs/resnet50_ssd300_voc0712_feature_fusion.yaml configs/resnet50_ssd300_voc0712_feature_fusion_kmeans.yaml
+
+  # 根据 kmeans_anchor.py 输出的优化配置，修改新配置文件中的 PRIORS 部分
+  # 将 MIN_SIZES 和 MAX_SIZES 替换为聚类得到的新值
+
+  步骤 3: 训练原始 Anchor 模型（对照组）
+  ────────────────────────────────
+  python3 train.py --config-file configs/resnet50_ssd300_voc0712_feature_fusion.yaml
+
+  # 模型保存路径: outputs/resnet50_ssd300_voc0712_feature_fusion/
+
+  步骤 4: 训练优化 Anchor 模型（实验组）
+  ────────────────────────────────
+  python3 train.py --config-file configs/resnet50_ssd300_voc0712_feature_fusion_kmeans.yaml
+
+  # 模型保存路径: outputs/resnet50_ssd300_voc0712_feature_fusion_kmeans/
+
+  步骤 5: 对比评估两个模型
+  ────────────────────────────────
+  # 评估原始 Anchor 模型
+  python3 test.py --config-file configs/resnet50_ssd300_voc0712_feature_fusion.yaml
+
+  # 评估优化 Anchor 模型
+  python3 test.py --config-file configs/resnet50_ssd300_voc0712_feature_fusion_kmeans.yaml
+
+  # 对比指标：mAP@0.5, mAP@0.75, 各类别 AP
+
+  对比实验结果记录表
+  ────────────────────────────────
+  | 模型配置        | 平均 IoU | mAP@0.5 | mAP@0.75 | 备注           |
+  |----------------|---------|---------|----------|---------------|
+  | 原始 Anchor     |         |         |          | 默认 SSD 配置   |
+  | K-means++ Anchor|         |         |          | 数据驱动优化    |
