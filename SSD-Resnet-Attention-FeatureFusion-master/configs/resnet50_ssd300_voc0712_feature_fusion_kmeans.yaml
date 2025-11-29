@@ -1,0 +1,36 @@
+# K-means++ 优化 Anchor 配置
+# 基于 VOC2007 数据集聚类分析结果
+# 平均 IoU: 0.5962
+
+MODEL:
+  NUM_CLASSES: 21
+  BACKBONE:
+    NAME: "R50_300"
+    OUT_CHANNELS: (512, 1024, 2048, 1024, 512, 256)
+  RESNET:
+    SE: False
+    CBAM: False
+    FUSION: True
+    BLOCKS: [3, 4, 6, 3]
+    EXTRAS: [128, 256, 512, 256, 128, 64, 64]
+  PRIORS:
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+    # K-means++ 优化后的 Anchor 尺寸
+    MIN_SIZES: [31, 75, 115, 166, 181, 255]
+    MAX_SIZES: [48, 93, 138, 173, 215, 306]
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+INPUT:
+  IMAGE_SIZE: 300
+DATASETS:
+  TRAIN: ("voc_2007_trainval",)
+  TEST: ("voc_2007_test", )
+SOLVER:
+  MAX_ITER: 120000
+  LR_STEPS: [80000, 100000]
+  GAMMA: 0.1
+  BATCH_SIZE: 16
+  LR: 1e-3
+
+OUTPUT_DIR: 'outputs/resnet50_ssd300_voc0712_feature_fusion_kmeans'
