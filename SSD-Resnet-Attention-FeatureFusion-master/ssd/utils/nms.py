@@ -60,12 +60,18 @@ def batched_nms(boxes, scores, idxs, iou_threshold):
     """
     if boxes.numel() == 0:
         return torch.empty((0,), dtype=torch.int64, device=boxes.device)
+
+    # 使用 torchvision 内置的 batched_nms (更稳定，避免溢出问题)
+    if hasattr(torchvision.ops, 'batched_nms'):
+        return torchvision.ops.batched_nms(boxes, scores, idxs, iou_threshold)
+
+    # fallback: 手动实现 (旧版 torchvision)
     # strategy: in order to perform NMS independently per class.
     # we add an offset to all the boxes. The offset is dependent
     # only on the class idx, and is large enough so that boxes
     # from different classes do not overlap
     max_coordinate = boxes.max()
-    offsets = idxs.to(boxes) * (max_coordinate + 1)
+    offsets = idxs.to(boxes) * (max_coordinate + torch.tensor(1.0, device=boxes.device))
     boxes_for_nms = boxes + offsets[:, None]
     keep = nms(boxes_for_nms, scores, iou_threshold)
     return keep
