@@ -45,7 +45,36 @@ python3 test.py --config-file configs/resnet50_ssd300_voc0712_feature_fusion.yam
 python3 test.py --config-file configs/resnet50_ssd300_voc0712_feature_fusion_kmeans.yaml
 
 # ============================================
-# 5. Qt 界面编译运行
+# 5. 增强模型训练 (A100 优化, 追求最高性能)
+# ============================================
+# 使用 Enhanced ResNet101 + CBAM + FPN + DropBlock
+# 支持 best 模型自动保存和早停机制
+python3 train.py --config-file configs/enhanced_a100_ultimate.yaml \
+                 --save_step 20000 --eval_step 2000 \
+                 --early_stop_patience 15 --early_stop_min_delta 0.001
+
+# 备用配置 (使用内置模块，兼容性更好)
+python3 train.py --config-file configs/enhanced_a100_builtin.yaml \
+                 --save_step 20000 --eval_step 2000
+
+# ============================================
+# 6. Co-DETR + Swin-L 训练 (SOTA 模型, 需安装 MMDetection)
+# ============================================
+# 安装 MMDetection
+pip install -U openmim
+mim install mmengine "mmcv>=2.0.0" mmdet
+
+# 训练 Co-DETR + Swin-L
+cd mmdet_codetr
+python train_codetr.py --config configs/co_detr_swin_l_voc.py
+
+# 测试
+python test_codetr.py --config configs/co_detr_swin_l_voc.py \
+                      --checkpoint work_dirs/co_detr_swin_l_voc/best_mAP.pth
+cd ..
+
+# ============================================
+# 7. Qt 界面编译运行
 # ============================================
 cd ../qt_deep2
 qmake external_program.pro

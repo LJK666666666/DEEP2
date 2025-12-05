@@ -1,0 +1,79 @@
+# ============================================================================
+# 终极增强版 SSD 配置 - A100 优化版
+# ============================================================================
+#
+# 硬件要求: NVIDIA A100 (40GB/80GB)
+#
+# 增强特性:
+#   1. Enhanced ResNet101 骨干网络 (自定义增强版)
+#   2. CBAM 注意力机制 (通道 + 空间双重注意力)
+#   3. 增强型 FPN 特征融合 (双向加权融合)
+#   4. DropBlock 正则化
+#   5. 大批量训练 (batch_size=64)
+#   6. 更长训练周期 (200k iterations)
+#   7. Warmup + Cosine 学习率策略
+#
+# 模型保存策略:
+#   - model_best.pth: 测试集上 mAP 最高的模型 (自动保存)
+#   - model_XXXXXX.pth: 每 20000 迭代保存一次 checkpoint
+#   - model_final.pth: 训练结束时保存
+#
+# 预期性能: mAP 75-78% on VOC2007 test
+#
+# 训练命令:
+#   python train.py --config-file configs/enhanced_a100_ultimate.yaml \
+#                   --save_step 20000 --eval_step 2000 \
+#                   --early_stop_patience 15 --early_stop_min_delta 0.001
+#
+# 早停参数说明:
+#   --early_stop_patience 15    : 连续 15 次评估无提升则停止 (15*2000=30k iter)
+#   --early_stop_min_delta 0.001: mAP 提升需超过 0.1% 才算有效提升
+#   设置为 -1 禁用早停
+# ============================================================================
+
+MODEL:
+  NUM_CLASSES: 21
+  BACKBONE:
+    NAME: "Enhanced_R101_300"              # 使用增强版 ResNet101
+    OUT_CHANNELS: (512, 1024, 512, 256, 256, 256)
+    PRETRAINED: True
+  RESNET:
+    SE: False                              # 不使用 SE (使用 CBAM)
+    CBAM: True                             # 启用 CBAM 注意力
+    FUSION: True                           # 启用增强型 FPN
+    DROPBLOCK: True                        # 启用 DropBlock 正则化
+    BLOCKS: [3, 4, 23, 3]                  # ResNet101 层配置
+    EXTRAS: [128, 256, 128, 64, 64, 64]    # Extra layers 配置
+  PRIORS:
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+    # 使用经过验证的默认 Anchor 尺寸
+    MIN_SIZES: [21, 45, 99, 153, 207, 261]
+    MAX_SIZES: [45, 99, 153, 207, 261, 315]
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+
+INPUT:
+  IMAGE_SIZE: 300
+
+DATASETS:
+  TRAIN: ("voc_2007_trainval",)
+  TEST: ("voc_2007_test",)
+
+SOLVER:
+  # A100 大批量训练配置
+  MAX_ITER: 150000                         # 更长训练 (200k)
+  LR_STEPS: [140000, 180000]               # 学习率衰减点
+  GAMMA: 0.1
+  BATCH_SIZE: 64                           # A100 大批量 (80GB 显存)
+  LR: 2e-3                                 # 大批量需要更大学习率
+  MOMENTUM: 0.9
+  WEIGHT_DECAY: 5e-4
+  WARMUP_FACTOR: 0.1
+  WARMUP_ITERS: 2000                       # 更长 warmup
+
+DATA_LOADER:
+  NUM_WORKERS: 16                          # 更多数据加载线程
+  PIN_MEMORY: True
+
+OUTPUT_DIR: 'outputs/enhanced_resnet101_cbam_fpn_a100'

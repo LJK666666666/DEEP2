@@ -1,0 +1,1 @@
+outputs/resnet50_ssd300_voc0712_feature_fusion/model_final.pth

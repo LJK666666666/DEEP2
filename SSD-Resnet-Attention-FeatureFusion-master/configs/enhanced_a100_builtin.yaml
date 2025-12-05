@@ -1,0 +1,63 @@
+# ============================================================================
+# 增强版 SSD 配置 - A100 优化版 (使用现有模块)
+# ============================================================================
+#
+# 说明: 如果自定义增强模块有兼容性问题，可使用此配置
+# 使用项目内置的 R101_300_ff + CBAM
+#
+# 硬件要求: NVIDIA A100 (40GB/80GB)
+#
+# 模型保存策略:
+#   - model_best.pth: 测试集上 mAP 最高的模型 (自动保存)
+#   - model_XXXXXX.pth: 每 20000 迭代保存一次 checkpoint
+#   - model_final.pth: 训练结束时保存
+#
+# 训练命令:
+#   python train.py --config-file configs/enhanced_a100_builtin.yaml \
+#                   --save_step 20000 --eval_step 2000
+# ============================================================================
+
+MODEL:
+  NUM_CLASSES: 21
+  BACKBONE:
+    NAME: "R101_300_ff"                    # 使用内置 ResNet101 + FPN
+    OUT_CHANNELS: (512, 1024, 2048, 1024, 512, 256)
+    PRETRAINED: True
+  RESNET:
+    SE: False                              # 不使用 SE
+    CBAM: True                             # 启用 CBAM 注意力
+    FUSION: True                           # 启�� FPN 特征融合
+    BLOCKS: [3, 4, 23, 3]                  # ResNet101 层配置
+    EXTRAS: [128, 256, 512, 256, 128, 64, 64]
+  PRIORS:
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+    MIN_SIZES: [21, 45, 99, 153, 207, 261]
+    MAX_SIZES: [45, 99, 153, 207, 261, 315]
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+
+INPUT:
+  IMAGE_SIZE: 300
+
+DATASETS:
+  TRAIN: ("voc_2007_trainval",)
+  TEST: ("voc_2007_test",)
+
+SOLVER:
+  # A100 大批量训练配置
+  MAX_ITER: 200000                         # 200k 迭代
+  LR_STEPS: [140000, 180000]
+  GAMMA: 0.1
+  BATCH_SIZE: 48                           # 大批量
+  LR: 1.5e-3                               # 大批量学习率
+  MOMENTUM: 0.9
+  WEIGHT_DECAY: 5e-4
+  WARMUP_FACTOR: 0.1
+  WARMUP_ITERS: 2000
+
+DATA_LOADER:
+  NUM_WORKERS: 16
+  PIN_MEMORY: True
+
+OUTPUT_DIR: 'outputs/resnet101_cbam_fpn_a100'

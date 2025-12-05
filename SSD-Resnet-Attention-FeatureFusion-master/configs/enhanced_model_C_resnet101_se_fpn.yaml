@@ -1,0 +1,41 @@
+# ============================================================================
+# 增强版 SSD 配置文件 - 方案 C: ResNet101 + SE + FPN (SE注意力版本)
+# ============================================================================
+# 适用场景: 显存充足, SE 比 CBAM 轻量但仍有效
+# 预期提升: mAP 可能达到 72-74%
+# ============================================================================
+
+MODEL:
+  NUM_CLASSES: 21
+  BACKBONE:
+    NAME: "R101_300_ff"                    # ResNet101 + Feature Fusion
+    OUT_CHANNELS: (512, 1024, 2048, 1024, 512, 256)
+  RESNET:
+    SE: True                               # 启用 SE 注意力 (比 CBAM 轻量)
+    CBAM: False                            # 不使用 CBAM (与 SE 互斥)
+    FUSION: True                           # 启用 FPN 特征融合
+    BLOCKS: [3, 4, 23, 3]                  # ResNet101 的层配置
+    EXTRAS: [128, 256, 512, 256, 128, 64, 64]
+  PRIORS:
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+    MIN_SIZES: [21, 45, 99, 153, 207, 261]
+    MAX_SIZES: [45, 99, 153, 207, 261, 315]
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+
+INPUT:
+  IMAGE_SIZE: 300
+
+DATASETS:
+  TRAIN: ("voc_2007_trainval",)
+  TEST: ("voc_2007_test",)
+
+SOLVER:
+  MAX_ITER: 150000
+  LR_STEPS: [100000, 130000]
+  GAMMA: 0.1
+  BATCH_SIZE: 10
+  LR: 5e-4
+
+OUTPUT_DIR: 'outputs/resnet101_ssd300_se_fpn_enhanced'

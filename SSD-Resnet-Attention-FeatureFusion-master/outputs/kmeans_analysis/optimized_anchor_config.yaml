@@ -1,0 +1,20 @@
+
+# ============================================
+# K-means++ 优化后的 Anchor 配置
+# ============================================
+# 使用以下配置替换 YAML 文件中的 PRIORS 部分
+
+MODEL:
+  PRIORS:
+    MIN_SIZES: [31, 75, 115, 166, 181, 255]
+    MAX_SIZES: [48, 93, 138, 173, 215, 306]
+    # 建议的宽高比 (基于聚类分析): [np.float64(1.0), np.float64(1.4), np.float64(1.5), np.float64(1.6), np.float64(1.8), np.float64(2.0)]
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+
+# 聚类中心 (归一化坐标):
+#   Anchor 1: [0.0850, 0.1252], aspect_ratio=0.68
+#   Anchor 2: [0.2072, 0.3001], aspect_ratio=0.69
+#   Anchor 3: [0.2682, 0.5493], aspect_ratio=0.49
+#   Anchor 4: [0.6924, 0.4410], aspect_ratio=1.57
+#   Anchor 5: [0.4458, 0.8153], aspect_ratio=0.55
+#   Anchor 6: [0.8668, 0.8348], aspect_ratio=1.04

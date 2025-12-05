@@ -59,9 +59,13 @@ def main():
     )
     parser.add_argument("--local_rank", type=int, default=0)
     parser.add_argument('--log_step', default=10, type=int, help='Print logs every log_step')
-    parser.add_argument('--save_step', default=6000, type=int, help='Save checkpoint every save_step')
-    parser.add_argument('--eval_step', default=1000, type=int, help='Evaluate dataset every eval_step, disabled when eval_step < 0')
+    parser.add_argument('--save_step', default=20000, type=int, help='Save checkpoint every save_step')
+    parser.add_argument('--eval_step', default=2000, type=int, help='Evaluate dataset every eval_step, disabled when eval_step < 0')
     parser.add_argument('--use_tensorboard', default=False, type=str2bool)
+    parser.add_argument('--early_stop_patience', default=10, type=int,
+                        help='Early stopping patience (number of evals without improvement). Disabled when < 0')
+    parser.add_argument('--early_stop_min_delta', default=0.0005, type=float,
+                        help='Minimum mAP improvement to be considered as an improvement')
     parser.add_argument(
         "--skip-test",
         dest="skip_test",

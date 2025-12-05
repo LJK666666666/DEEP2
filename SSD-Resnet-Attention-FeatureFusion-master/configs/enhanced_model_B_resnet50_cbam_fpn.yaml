@@ -1,0 +1,41 @@
+# ============================================================================
+# 增强版 SSD 配置文件 - 方案 B: ResNet50 + CBAM + FPN (平衡配置)
+# ============================================================================
+# 适用场景: 显存适中 (8-12GB), 平衡精度和训练速度
+# 预期提升: mAP 可能达到 72-74%
+# ============================================================================
+
+MODEL:
+  NUM_CLASSES: 21
+  BACKBONE:
+    NAME: "R50_300"                        # ResNet50 + Feature Fusion
+    OUT_CHANNELS: (512, 1024, 2048, 1024, 512, 256)
+  RESNET:
+    SE: False                              # 不使用 SE (与 CBAM 互斥)
+    CBAM: True                             # 启用 CBAM 注意力机制
+    FUSION: True                           # 启用 FPN 特征融合
+    BLOCKS: [3, 4, 6, 3]                   # ResNet50 的层配置
+    EXTRAS: [128, 256, 512, 256, 128, 64, 64]
+  PRIORS:
+    FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+    STRIDES: [8, 16, 32, 64, 100, 300]
+    MIN_SIZES: [21, 45, 99, 153, 207, 261]
+    MAX_SIZES: [45, 99, 153, 207, 261, 315]
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4]
+
+INPUT:
+  IMAGE_SIZE: 300
+
+DATASETS:
+  TRAIN: ("voc_2007_trainval",)
+  TEST: ("voc_2007_test",)
+
+SOLVER:
+  MAX_ITER: 150000
+  LR_STEPS: [100000, 130000]
+  GAMMA: 0.1
+  BATCH_SIZE: 12                           # 比方案 A 可以用更大 batch
+  LR: 5e-4
+
+OUTPUT_DIR: 'outputs/resnet50_ssd300_cbam_fpn_enhanced'
