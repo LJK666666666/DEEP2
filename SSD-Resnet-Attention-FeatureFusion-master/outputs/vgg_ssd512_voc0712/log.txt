@@ -84,3 +84,111 @@ TEST:
   NMS_THRESHOLD: 0.45
 2025-12-06 01:16:54,303 SSD.inference INFO: No checkpoint found.
 2025-12-06 01:16:54,305 SSD.inference INFO: Evaluating voc_2007_test dataset(4952 images):
+2025-12-06 01:21:31,514 SSD INFO: Using 1 GPUs
+2025-12-06 01:21:31,514 SSD INFO: Namespace(config_file='configs/vgg_ssd512_voc0712.yaml', local_rank=0, ckpt=None, output_dir='eval_results', opts=[])
+2025-12-06 01:21:31,514 SSD INFO: Loaded configuration file configs/vgg_ssd512_voc0712.yaml
+2025-12-06 01:21:31,514 SSD INFO: 
+MODEL:
+  NUM_CLASSES: 21
+  BACKBONE:
+    OUT_CHANNELS: (512, 1024, 512, 256, 256, 256, 256)
+  PRIORS:
+    FEATURE_MAPS: [64, 32, 16, 8, 4, 2, 1]
+    STRIDES: [8, 16, 32, 64, 128, 256, 512]
+    MIN_SIZES: [35.84, 76.8, 153.6, 230.4, 307.2, 384.0, 460.8]
+    MAX_SIZES: [76.8, 153.6, 230.4, 307.2, 384.0, 460.8, 537.65]
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 6, 4, 4]
+INPUT:
+  IMAGE_SIZE: 512
+DATASETS:
+  TRAIN: ("voc_2007_trainval", "voc_2012_trainval")
+  TEST: ("voc_2007_test", )
+SOLVER:
+  MAX_ITER: 120000
+  LR_STEPS: [80000, 100000]
+  GAMMA: 0.1
+  BATCH_SIZE: 24
+  LR: 1e-3
+
+OUTPUT_DIR: 'outputs/vgg_ssd512_voc0712'
+2025-12-06 01:21:31,514 SSD INFO: Running with config:
+DATASETS:
+  TEST: ('voc_2007_test',)
+  TRAIN: ('voc_2007_trainval', 'voc_2012_trainval')
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+INPUT:
+  IMAGE_SIZE: 512
+  PIXEL_MEAN: [123, 117, 104]
+MODEL:
+  BACKBONE:
+    NAME: vgg
+    OUT_CHANNELS: (512, 1024, 512, 256, 256, 256, 256)
+    PRETRAINED: True
+  BOX_HEAD:
+    NAME: SSDBoxHead
+    PREDICTOR: SSDBoxPredictor
+  CENTER_VARIANCE: 0.1
+  DEVICE: cuda
+  META_ARCHITECTURE: SSDDetector
+  NEG_POS_RATIO: 3
+  NUM_CLASSES: 21
+  PRIORS:
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 6, 4, 4]
+    CLIP: True
+    FEATURE_MAPS: [64, 32, 16, 8, 4, 2, 1]
+    MAX_SIZES: [76.8, 153.6, 230.4, 307.2, 384.0, 460.8, 537.65]
+    MIN_SIZES: [35.84, 76.8, 153.6, 230.4, 307.2, 384.0, 460.8]
+    STRIDES: [8, 16, 32, 64, 128, 256, 512]
+  RESNET:
+    BLOCKS: [3, 4, 6, 3]
+    CBAM: False
+    EXTRAS: [512, 256, 128, 64]
+    FUSION: False
+    SE: False
+  SIZE_VARIANCE: 0.2
+  THRESHOLD: 0.5
+OUTPUT_DIR: outputs/vgg_ssd512_voc0712
+SOLVER:
+  BATCH_SIZE: 24
+  GAMMA: 0.1
+  LR: 0.001
+  LR_STEPS: [80000, 100000]
+  MAX_ITER: 120000
+  MOMENTUM: 0.9
+  WARMUP_FACTOR: 0.3333333333333333
+  WARMUP_ITERS: 500
+  WEIGHT_DECAY: 0.0005
+TEST:
+  BATCH_SIZE: 10
+  CONFIDENCE_THRESHOLD: 0.01
+  MAX_PER_CLASS: -1
+  MAX_PER_IMAGE: 100
+  NMS_THRESHOLD: 0.45
+2025-12-06 01:21:32,190 SSD.inference INFO: No checkpoint found.
+2025-12-06 01:21:32,192 SSD.inference INFO: Evaluating voc_2007_test dataset(4952 images):
+2025-12-06 01:31:40,447 SSD.inference INFO: mAP: 0.0000
+aeroplane       : 0.0000
+bicycle         : 0.0000
+bird            : 0.0000
+boat            : 0.0000
+bottle          : 0.0000
+bus             : 0.0000
+car             : 0.0000
+cat             : 0.0000
+chair           : 0.0000
+cow             : 0.0000
+diningtable     : 0.0000
+dog             : 0.0000
+horse           : 0.0000
+motorbike       : 0.0000
+person          : 0.0000
+pottedplant     : 0.0000
+sheep           : 0.0000
+sofa            : 0.0000
+train           : 0.0000
+tvmonitor       : 0.0000
+
