@@ -107,8 +107,7 @@ class WarmupReduceLROnPlateau:
             mode=mode,
             factor=factor,
             patience=patience,
-            min_lr=min_lr,
-            verbose=True
+            min_lr=min_lr
         )
 
         # 标记是否在预热阶段
