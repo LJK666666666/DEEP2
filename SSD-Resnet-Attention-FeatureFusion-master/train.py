@@ -21,6 +21,16 @@ from ssd.utils.misc import str2bool
 def train(cfg, args):
     logger = logging.getLogger('SSD.trainer')
     model = build_detection_model(cfg)
+
+    if args.init_weight:
+        checkpoint = torch.load(args.init_weight, map_location="cpu")
+        state_dict = checkpoint.get("model", checkpoint)
+        missing, unexpected = model.load_state_dict(state_dict, strict=False)
+        logger.info(f"Loaded init weights from {args.init_weight}")
+        if missing:
+            logger.info("Missing keys: %s", missing)
+        if unexpected:
+            logger.info("Unexpected keys: %s", unexpected)
     device = torch.device(cfg.MODEL.DEVICE)
 
     model.to(device)
@@ -66,6 +76,8 @@ def main():
                         help='Early stopping patience (number of evals without improvement). Disabled when < 0')
     parser.add_argument('--early_stop_min_delta', default=0.0005, type=float,
                         help='Minimum mAP improvement to be considered as an improvement')
+    parser.add_argument('--init_weight', type=str, default='',
+                        help='Path to initial weights (.pth). Accepts state_dict or {"model": state_dict}.')
     parser.add_argument(
         "--skip-test",
         dest="skip_test",
