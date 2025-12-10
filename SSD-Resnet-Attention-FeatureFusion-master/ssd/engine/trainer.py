@@ -7,6 +7,7 @@ import torch
 import torch.distributed as dist
 
 from ssd.engine.inference import do_evaluation
+from ssd.solver.lr_scheduler import WarmupReduceLROnPlateau
 from ssd.utils import dist_util
 from ssd.utils.metric_logger import MetricLogger
 
@@ -83,6 +84,13 @@ def do_train(cfg, model,
     if early_stop_patience > 0:
         logger.info(f"Early stopping enabled: patience={early_stop_patience}, min_delta={early_stop_min_delta}")
 
+    # 检查调度器类型
+    is_plateau_scheduler = isinstance(scheduler, WarmupReduceLROnPlateau)
+    if is_plateau_scheduler:
+        logger.info("Using ReduceLROnPlateau scheduler (LR adjusted based on mAP)")
+        if args.eval_step <= 0:
+            logger.warning("WARNING: ReduceLROnPlateau requires --eval_step > 0 to function properly!")
+
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         iteration = iteration + 1
         arguments["iteration"] = iteration
@@ -100,7 +108,14 @@ def do_train(cfg, model,
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        scheduler.step()
+
+        # 更新学习率
+        if is_plateau_scheduler:
+            # ReduceLROnPlateau: 每次迭代更新预热阶段，评估时更新正常阶段
+            scheduler.step_iteration()
+        else:
+            # WarmupMultiStepLR / WarmupCosineAnnealingLR: 每次迭代更新
+            scheduler.step()
 
         batch_time = time.time() - end
         end = time.time()
@@ -143,6 +158,11 @@ def do_train(cfg, model,
                 if eval_results and len(eval_results) > 0:
                     current_mAP = eval_results[0]['metrics'].get('mAP', 0.0)
                     logger.info(f"Iteration {iteration}: mAP = {current_mAP:.4f}, best_mAP = {best_mAP:.4f}")
+
+                    # ReduceLROnPlateau: 基于 mAP 更新学习率
+                    if is_plateau_scheduler:
+                        scheduler.step_metric(current_mAP)
+                        logger.info(f"ReduceLROnPlateau: LR updated to {optimizer.param_groups[0]['lr']:.6f}")
 
                     # 检查是否有显著提升
                     if current_mAP > best_mAP + early_stop_min_delta:

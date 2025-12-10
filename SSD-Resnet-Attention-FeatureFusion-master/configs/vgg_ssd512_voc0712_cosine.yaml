@@ -1,0 +1,32 @@
+# VGG SSD512 + CosineAnnealing 学习率调度
+# 余弦退火：学习率平滑衰减到最小值
+#
+# 训练命令:
+#   python train.py --config-file configs/vgg_ssd512_voc0712_cosine.yaml
+
+MODEL:
+  NUM_CLASSES: 21
+  BACKBONE:
+    OUT_CHANNELS: (512, 1024, 512, 256, 256, 256, 256)
+  PRIORS:
+    FEATURE_MAPS: [64, 32, 16, 8, 4, 2, 1]
+    STRIDES: [8, 16, 32, 64, 128, 256, 512]
+    MIN_SIZES: [35.84, 76.8, 153.6, 230.4, 307.2, 384.0, 460.8]
+    MAX_SIZES: [76.8, 153.6, 230.4, 307.2, 384.0, 460.8, 537.65]
+    ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2, 3], [2], [2]]
+    BOXES_PER_LOCATION: [4, 6, 6, 6, 6, 4, 4]
+INPUT:
+  IMAGE_SIZE: 512
+DATASETS:
+  TRAIN: ("voc_2007_trainval", "voc_2007_test", "voc_2012_trainval", )
+  TEST: ("voc_2012_test", )
+SOLVER:
+  MAX_ITER: 120000
+  BATCH_SIZE: 256
+  LR: 1e-3
+  # CosineAnnealing 配置
+  LR_SCHEDULER: "WarmupCosineAnnealingLR"
+  COSINE_T_MAX: 0           # 0 表示使用 MAX_ITER 作为周期
+  COSINE_ETA_MIN: 1e-6      # 最小学习率
+
+OUTPUT_DIR: 'outputs/vgg_ssd512_voc0712_cosine'

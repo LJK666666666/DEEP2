@@ -91,6 +91,16 @@ _C.SOLVER.WEIGHT_DECAY = 5e-4
 _C.SOLVER.WARMUP_FACTOR = 1.0 / 3
 _C.SOLVER.WARMUP_ITERS = 500
 
+# LR Scheduler config
+_C.SOLVER.LR_SCHEDULER = "WarmupMultiStepLR"  # WarmupMultiStepLR, WarmupCosineAnnealingLR, ReduceLROnPlateau
+# ReduceLROnPlateau config
+_C.SOLVER.PLATEAU_PATIENCE = 5      # 连续多少次评估没有提升时降低学习率
+_C.SOLVER.PLATEAU_FACTOR = 0.1      # 学习率衰减因子
+_C.SOLVER.PLATEAU_MIN_LR = 1e-6     # 最小学习率
+# CosineAnnealing config
+_C.SOLVER.COSINE_T_MAX = 0          # 余弦周期，0 表示使用 MAX_ITER
+_C.SOLVER.COSINE_ETA_MIN = 1e-6     # 余弦退火最小学习率
+
 # ---------------------------------------------------------------------------- #
 # Specific test options
 # ---------------------------------------------------------------------------- #

@@ -58,6 +58,22 @@ python3 train.py --config-file configs/enhanced_a100_builtin.yaml \
                  --save_step 20000 --eval_step 2000
 
 # ============================================
+# 5.1 学习率调度器选择
+# ============================================
+# 支持三种学习率调度策略，通过 SOLVER.LR_SCHEDULER 配置
+
+# (1) 固定步长衰减 (默认)
+python3 train.py --config-file configs/xxx.yaml SOLVER.LR_SCHEDULER WarmupMultiStepLR
+
+# (2) 余弦退火
+python3 train.py --config-file configs/xxx.yaml SOLVER.LR_SCHEDULER WarmupCosineAnnealingLR
+
+# (3) 基于验证集性能自适应调整 (必须配合 --eval_step 使用)
+python3 train.py --config-file configs/xxx.yaml --eval_step 2500 \
+                 SOLVER.LR_SCHEDULER ReduceLROnPlateau \
+                 SOLVER.PLATEAU_PATIENCE 5 SOLVER.PLATEAU_FACTOR 0.1
+
+# ============================================
 # 6. Co-DETR + Swin-L 训练 (SOTA 模型, 需安装 MMDetection)
 # ============================================
 # 安装 MMDetection
