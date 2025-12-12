@@ -18,16 +18,16 @@ MODEL:
 INPUT:
   IMAGE_SIZE: 512
 DATASETS:
-  TRAIN: ("voc_2007_trainval", "voc_2007_test", "voc_2012_trainval", )
-  TEST: ("voc_2012_test", )
+  TRAIN: ("voc_2007_trainval", "voc_2007_test", )
+  TEST: ("voc_2012_trainval", )
 SOLVER:
-  MAX_ITER: 120000
-  BATCH_SIZE: 24
-  LR: 1e-3
+  MAX_ITER: 40000
+  BATCH_SIZE: 64
+  LR: 0.001
   # ReduceLROnPlateau 配置
   LR_SCHEDULER: "ReduceLROnPlateau"
-  PLATEAU_PATIENCE: 5       # 连续 5 次评估无提升后降低学习率
-  PLATEAU_FACTOR: 0.1       # 学习率衰减为原来的 0.1
+  PLATEAU_PATIENCE: 3       # 连续 n 次评估无提升后降低学习率
+  PLATEAU_FACTOR: 0.3       # 学习率衰减
   PLATEAU_MIN_LR: 1e-6      # 最小学习率
 
 OUTPUT_DIR: 'outputs/vgg_ssd512_voc0712_plateau'
