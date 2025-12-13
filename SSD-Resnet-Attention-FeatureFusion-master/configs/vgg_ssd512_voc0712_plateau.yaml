@@ -18,8 +18,8 @@ MODEL:
 INPUT:
   IMAGE_SIZE: 512
 DATASETS:
-  TRAIN: ("voc_2007_trainval", "voc_2007_test", )
-  TEST: ("voc_2012_trainval", )
+  TRAIN: ("voc_2007_trainval", "voc_2007_test", "voc_2012_trainval", )
+  TEST: ("coco_2017_val_voc", )
 SOLVER:
   MAX_ITER: 40000
   BATCH_SIZE: 64

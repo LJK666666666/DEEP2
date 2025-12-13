@@ -7,7 +7,8 @@ from ssd.structures.container import Container
 
 
 class COCODataset(torch.utils.data.Dataset):
-    class_names = ('__background__',
+    # 默认 COCO 80 类
+    COCO_CLASSES = ('__background__',
                    'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
                    'train', 'truck', 'boat', 'traffic light', 'fire hydrant',
                    'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog',
@@ -24,6 +25,13 @@ class COCODataset(torch.utils.data.Dataset):
                    'refrigerator', 'book', 'clock', 'vase', 'scissors',
                    'teddy bear', 'hair drier', 'toothbrush')
 
+    # VOC 20 类 (用于 coco_voc 数据集)
+    VOC_CLASSES = ('__background__',
+                   'aeroplane', 'bicycle', 'bird', 'boat', 'bottle',
+                   'bus', 'car', 'cat', 'chair', 'cow',
+                   'diningtable', 'dog', 'horse', 'motorbike', 'person',
+                   'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor')
+
     def __init__(self, data_dir, ann_file, transform=None, target_transform=None, remove_empty=False):
         from pycocotools.coco import COCO
         self.coco = COCO(ann_file)
@@ -37,9 +45,21 @@ class COCODataset(torch.utils.data.Dataset):
         else:
             # when testing, all images used.
             self.ids = list(self.coco.imgs.keys())
+
+        # 动态获取类别
         coco_categories = sorted(self.coco.getCatIds())
         self.coco_id_to_contiguous_id = {coco_id: i + 1 for i, coco_id in enumerate(coco_categories)}
         self.contiguous_id_to_coco_id = {v: k for k, v in self.coco_id_to_contiguous_id.items()}
+
+        # 根据标注文件中的类别数量选择 class_names
+        num_categories = len(coco_categories)
+        if num_categories == 20:
+            # VOC 类别 (从标注文件中读取类别名)
+            cat_info = {cat['id']: cat['name'] for cat in self.coco.loadCats(coco_categories)}
+            self.class_names = ['__background__'] + [cat_info[cid] for cid in coco_categories]
+        else:
+            # 默认 COCO 类别
+            self.class_names = self.COCO_CLASSES
 
     def __getitem__(self, index):
         image_id = self.ids[index]
