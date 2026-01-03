@@ -5,7 +5,7 @@ import os
 import torch
 import torch.utils.data
 
-from ssd.config import cfg
+from ssd.config import cfg, load_config_file
 from ssd.engine.inference import do_evaluation
 from ssd.modeling.detector import build_detection_model
 from ssd.utils import dist_util
@@ -64,7 +64,7 @@ def main():
         torch.distributed.init_process_group(backend="nccl", init_method="env://")
         synchronize()
 
-    cfg.merge_from_file(args.config_file)
+    load_config_file(args.config_file)  # UTF-8 encoding support
     cfg.merge_from_list(args.opts)
     cfg.freeze()
 

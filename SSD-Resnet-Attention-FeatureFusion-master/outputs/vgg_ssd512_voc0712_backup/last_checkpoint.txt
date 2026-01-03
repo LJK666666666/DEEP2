@@ -1,1 +1,0 @@
-outputs/vgg_ssd512_voc0712/model_final.pth

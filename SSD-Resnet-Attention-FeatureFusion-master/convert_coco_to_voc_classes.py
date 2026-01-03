@@ -6,6 +6,13 @@
         --coco_ann datasets/COCO2017/Annotations/instances_val2017.json \
         --output datasets/COCO2017/Annotations/instances_val2017_voc.json
 
+    # 同时删除不包含 VOC 类别的图片:
+    python convert_coco_to_voc_classes.py \
+        --coco_ann datasets/COCO2017/Annotations/instances_val2017.json \
+        --output datasets/COCO2017/Annotations/instances_val2017_voc.json \
+        --images_dir datasets/COCO2017/JPEGImages \
+        --delete_unused
+
 生成的标注文件可以直接用于 VOC 训练的模型测试。
 """
 
@@ -80,13 +87,15 @@ for voc_name, voc_id in VOC_CATEGORIES.items():
 VALID_COCO_IDS = set(COCO_ID_TO_VOC_ID.keys())
 
 
-def convert_coco_to_voc_classes(coco_ann_path, output_path):
+def convert_coco_to_voc_classes(coco_ann_path, output_path, images_dir=None, delete_unused=False):
     """
     从 COCO 标注中提取 VOC 类别，并重新映射类别 ID。
 
     Args:
         coco_ann_path: COCO 标注文件路径 (instances_val2017.json)
         output_path: 输出文件路径
+        images_dir: 图片目录路径（用于删除未使用的图片）
+        delete_unused: 是否删除不包含 VOC 类别的图片
     """
     print(f"Loading COCO annotations from {coco_ann_path}...")
     with open(coco_ann_path, 'r') as f:
@@ -150,6 +159,41 @@ def convert_coco_to_voc_classes(coco_ann_path, output_path):
 
     print(f"\nSaved to {output_path}")
 
+    # 删除不包含 VOC 类别的图片
+    if delete_unused and images_dir:
+        if not os.path.isdir(images_dir):
+            print(f"\nWarning: Images directory not found: {images_dir}")
+            return
+
+        # 获取保留的图片文件名
+        kept_filenames = set(img['file_name'] for img in new_images)
+
+        # 获取原始所有图片文件名
+        all_filenames = set(img['file_name'] for img in coco_data['images'])
+
+        # 计算需要删除的图片
+        to_delete = all_filenames - kept_filenames
+
+        if not to_delete:
+            print("\nNo unused images to delete.")
+            return
+
+        print(f"\nDeleting {len(to_delete)} unused images...")
+        deleted_count = 0
+        not_found_count = 0
+
+        for filename in to_delete:
+            filepath = os.path.join(images_dir, filename)
+            if os.path.exists(filepath):
+                os.remove(filepath)
+                deleted_count += 1
+            else:
+                not_found_count += 1
+
+        print(f"Deleted: {deleted_count} images")
+        if not_found_count > 0:
+            print(f"Not found (already deleted?): {not_found_count} images")
+
 
 def main():
     parser = argparse.ArgumentParser(description='Convert COCO annotations to VOC classes')
@@ -157,9 +201,16 @@ def main():
                         help='Path to COCO annotation file (e.g., instances_val2017.json)')
     parser.add_argument('--output', type=str, required=True,
                         help='Output path for filtered annotations')
+    parser.add_argument('--images_dir', type=str, default=None,
+                        help='Path to images directory (required if --delete_unused is set)')
+    parser.add_argument('--delete_unused', action='store_true',
+                        help='Delete images that do not contain any VOC classes')
     args = parser.parse_args()
 
-    convert_coco_to_voc_classes(args.coco_ann, args.output)
+    if args.delete_unused and not args.images_dir:
+        parser.error("--images_dir is required when --delete_unused is set")
+
+    convert_coco_to_voc_classes(args.coco_ann, args.output, args.images_dir, args.delete_unused)
 
 
 if __name__ == '__main__':

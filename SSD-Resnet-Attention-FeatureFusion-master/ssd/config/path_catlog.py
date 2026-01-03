@@ -61,6 +61,10 @@ class DatasetCatalog:
             "ann_file": "COCO2017/Annotations/instances_val2017.json"
         },
         # COCO 数据集，仅包含 VOC 的 20 个类别
+        'coco_2017_train_voc': {
+            "data_dir": "COCO2017/JPEGImages",
+            "ann_file": "COCO2017/Annotations/instances_train2017_voc.json"
+        },
         'coco_2017_val_voc': {
             "data_dir": "COCO2017/JPEGImages",
             "ann_file": "COCO2017/Annotations/instances_val2017_voc.json"

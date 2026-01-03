@@ -5,3 +5,11 @@ SSD-Resnet-Attention-FeatureFusion-master/datasets/
 *.zip
 
 backup/
+
+SSD-Resnet-Attention-FeatureFusion-master/configs/nul
+
+ultralytics/
+
+nul
+
+

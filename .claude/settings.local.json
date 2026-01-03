@@ -3,7 +3,16 @@
     "allow": [
       "Bash(dir:*)",
       "Bash(cat:*)",
-      "Bash(python convert_coco_to_voc_classes.py:*)"
+      "Bash(python convert_coco_to_voc_classes.py:*)",
+      "Bash(python:*)",
+      "Bash(pip show:*)",
+      "Bash(findstr:*)",
+      "Bash(pip install:*)",
+      "Bash(nvidia-smi:*)",
+      "Bash(pip index:*)",
+      "Bash(pip search:*)",
+      "Bash(pip uninstall:*)",
+      "WebFetch(domain:download.openmmlab.com)"
     ],
     "deny": [],
     "ask": []

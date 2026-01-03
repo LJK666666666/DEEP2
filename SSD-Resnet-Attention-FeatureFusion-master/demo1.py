@@ -6,7 +6,7 @@ import torch
 from PIL import Image
 from vizer.draw import draw_boxes
 
-from ssd.config import cfg
+from ssd.config import cfg, load_config_file
 from ssd.data.datasets import COCODataset, VOCDataset
 import argparse
 import numpy as np
@@ -105,7 +105,7 @@ def main():
     args = parser.parse_args()
     print(args)
 
-    cfg.merge_from_file(args.config_file)
+    load_config_file(args.config_file)  # UTF-8 encoding support
     cfg.merge_from_list(args.opts)
     cfg.freeze()
 

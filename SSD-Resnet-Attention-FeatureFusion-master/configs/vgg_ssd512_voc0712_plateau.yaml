@@ -1,7 +1,7 @@
-# VGG SSD512 + ReduceLROnPlateau 学习率调度
-# 基于验证集 mAP 自适应调整学习率
+# VGG SSD512 + ReduceLROnPlateau
+# Adaptive learning rate based on validation mAP
 #
-# 训练命令 (必须配合 --eval_step 使用):
+# Usage (must use with --eval_step):
 #   python train.py --config-file configs/vgg_ssd512_voc0712_plateau.yaml --eval_step 2500
 
 MODEL:
@@ -17,20 +17,20 @@ MODEL:
     BOXES_PER_LOCATION: [4, 6, 6, 6, 6, 4, 4]
 INPUT:
   IMAGE_SIZE: 512
-# DATASETS:
-#   TRAIN: ("voc_2007_trainval", "voc_2007_test", "voc_2012_trainval", )
-#   TEST: ("coco_2017_val_voc", )
 DATASETS:
   TRAIN: ("voc_2007_trainval", "voc_2007_test", "voc_2012_trainval", )
-  TEST: ("voc_2007_test", )
+  TEST: ("coco_2017_val_voc", )
+# DATASETS:
+#   TRAIN: ("voc_2007_test", )
+#   TEST: ("voc_2007_test", )
 SOLVER:
   MAX_ITER: 10000
-  BATCH_SIZE: 64
+  BATCH_SIZE: 16
   LR: 0.0001
-  # ReduceLROnPlateau 配置
+  # ReduceLROnPlateau config
   LR_SCHEDULER: "ReduceLROnPlateau"
-  PLATEAU_PATIENCE: 3       # 连续 n 次评估无提升后降低学习率
-  PLATEAU_FACTOR: 0.3       # 学习率衰减
-  PLATEAU_MIN_LR: 1e-6      # 最小学习率
+  PLATEAU_PATIENCE: 3
+  PLATEAU_FACTOR: 0.3
+  PLATEAU_MIN_LR: 1e-6
 
-OUTPUT_DIR: 'outputs/vgg_ssd512_voc0712_plateau'
+OUTPUT_DIR: 'outputs/vgg_ssd512_voc0712_plateau_2'

@@ -1,1 +1,0 @@
-outputs/resnet50_ssd300_voc0712_feature_fusion_kmeans/model_final.pth
